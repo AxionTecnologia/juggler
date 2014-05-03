@@ -1,8 +1,8 @@
-# set :stages_root, 'config/deploy'
+# Load DSL and Setup multiple configurations
+# https://github.com/railsware/capistrano-multiconfig
 require 'capistrano/multiconfig'
+require 'json'
+require 'erubis'
 
-# Includes default deployment tasks
-require 'capistrano/deploy'
-
-# Loads custom tasks from `lib/capistrano/tasks' if you have any defined.
-Dir.glob('lib/capistrano/tasks/*.rake').each { |r| import r }
+# Loads custom tasks
+Dir.glob('tasks/*.rake').each { |r| import r }
