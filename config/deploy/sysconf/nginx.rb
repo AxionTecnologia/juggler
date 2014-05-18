@@ -1,8 +1,6 @@
-ask(:ssh_password, "default", echo: false)
 set :user, "axion"
 set :nginx_app_name, "nginx"
 set :nginx_app_port, nil
-set :src_dir, "$HOME/src"
 set :nginx_package_name, "nginx-1.7.0"
 
 namespace :deploy do
@@ -16,7 +14,6 @@ namespace :deploy do
 
   task :compile_nginx do
     on roles(:nginx) do |host|
-      execute :mkdir, fetch(:src_dir)
       execute("cd #{fetch(:src_dir)}
 	      curl -O http://nginx.org/download/#{fetch(:nginx_package_name)}.tar.gz
 	      tar -xzvf #{fetch(:nginx_package_name)}.tar.gz")
@@ -48,6 +45,7 @@ namespace :deploy do
 
   task :configure_nginx do
     on roles(:nginx) do |host|
+      execute "mkdir -p $HOME/local/etc/nginx/"
       execute :mv, "$HOME/local/etc/nginx.conf $HOME/local/etc/nginx.conf.backup"
       template = Erubis::Eruby.new(File.read('assets/nginx.conf.eruby'))
       upload! StringIO.new(template.result(port: fetch(:nginx_app_port))), "/tmp/nginx.conf"
@@ -62,6 +60,14 @@ namespace :deploy do
       invoke "deploy:compile_nginx"
       invoke "deploy:install_nginx"
       invoke "deploy:configure_nginx"
+    end
+  end
+
+  task :start do
+    on roles(:nginx) do |host|
+      execute("PATH=$HOME/local/sbin:$PATH; which nginx")
+      execute("PATH=$HOME/local/sbin:$PATH; nginx -t")
+      execute("PATH=$HOME/local/sbin:$PATH; nginx")
     end
   end
 end
