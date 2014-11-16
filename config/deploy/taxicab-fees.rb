@@ -53,6 +53,7 @@ namespace :deploy do
     on roles(:app) do |host|
       within "#{fetch(:release_path)}/taxicab_fees" do
         execute :bash, "-l -c 'python2.7 manage.py collectstatic -v0 --noinput'"
+        execute :bash, "-l -c 'python2.7 manage.py compilemessages'"
       end
     end
   end
